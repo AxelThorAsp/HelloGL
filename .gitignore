@@ -7,7 +7,8 @@ include/
 glad.c
 .vs*/
 x64/Debug/
-*.vxproj*
+*.vcxproj*
+*.sln
 
 # User-specific files
 *.suo
