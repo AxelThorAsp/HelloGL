@@ -13,10 +13,11 @@ class EBO
 {
 
 private:
-	GLuint _id;
+	GLuint m_id;
+	GLuint m_Count;
 
 public:
-	EBO(GLuint* indices, GLsizeiptr size);
+	EBO(GLuint* indices, GLuint count);
 	~EBO();
 
 	// This tells OpenGL that subsequent vertex data operations should be applied to this buffer object.
@@ -26,6 +27,11 @@ public:
 	void Unbind();
 
 	void Delete();
+
+	inline GLuint GetCount() const
+	{
+		return m_Count;
+	}
 };
 
 #endif // VBO_H

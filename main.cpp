@@ -1,18 +1,38 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cstddef>
 
 #include "Shader.h"
 #include "VBO.h"
 #include "VAO.h"
 #include "EBO.h"
+#include "Util.h"
+#include "VertexBufferLayout.h"
 
 
-#define WIN_H 800
-#define WIN_W 800
+#define WIN_H 600
+#define WIN_W 600
 
-const char* fragFilePath = "default.frag";
-const char* vertFilePath = "default.vert";
+const char *fragFilePath = "default.frag";
+const char *vertFilePath = "default.vert";
+
+struct Pos
+{
+	GLfloat x, y, z;
+};
+
+struct Color
+{
+	GLfloat r, g, b;
+};
+
+struct Vertex
+{
+	Pos position;
+	Color color;
+};
+
 
 int main(void)
 {
@@ -38,60 +58,84 @@ int main(void)
 	}
 	// Introduce the window into the current context
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(1);
 
 	//Load GLAD so it configures OpenGL
-	gladLoadGL();
+	if (gladLoadGL() < 1)
+	{
+		std::cerr << "Error in gladLoadGL()" << std::endl;
+		throw(errno);
+	}
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
 	// Specify the viewport of OpenGL in the Window
-	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-	glViewport(0, 0, 800, 800);
+	glViewport(0, 0, WIN_W, WIN_H);
 
 	Shader shader = Shader(vertFilePath, fragFilePath);
 
+	const int NUM_VERT = 4;
 	// Vertices coordinates
-	GLfloat vertices[] =
+	Vertex vertices[] =
 	{
-		-0.5f,   -0.5f  * float(sqrt(3)) / 3, 0.0f, // Lower left corner
-		0.5f,  -0.5f    * float(sqrt(3)) / 3, 0.0f, // Lower right corner
-		0.0f, 0.5f      * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
-		-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-		0.5f  / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
-		0.0f, -0.5f     * float(sqrt(3)) / 3, 0.0f // Inner down
+		{
+			{-0.5f, 0.0f, 0.0f},
+			{0.4f, 0.3f, 0.52f}
+		},
+		{
+			{ 0.5f, 0.0f, 0.0f},
+			{0.3f, 0.3f, 0.42f}
+		},
+		{
+			{ 0.5f, 1.0f, 0.0f},
+			{0.2f, 0.2f, 0.8f}
+		},
+		{
+			{-0.5f, 1.0f, 0.0f},
+			{0.2f, 0.2f, 0.8f}
+		},
 	};
 
-	GLfloat colors[] =
-	{
-		0.6f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.5f, 0.0f, 0.5f,
-		0.0f, 0.5f, 0.0f,
-		0.0f, 0.5f, 1.0f,
-	};
 
-	GLuint indices[] =
+	const unsigned int NUM_IND = 6;
+	// Indices for vertices order
+	GLuint indices[NUM_IND] =
 	{
 		0, 1, 2,
-		0, 2, 3,
-		0, 3, 5
+		0, 3, 2
 	};
-
 
 	VAO vao;
 	vao.Bind();
 
-	VBO vbo(vertices, sizeof(vertices));
-	VBO vbocol(colors, sizeof(colors));
+	VBO vbo(vertices, sizeof(Vertex) * NUM_VERT);
 
-	EBO ebo(indices, sizeof(indices));
 
-	vao.LinkVBO(&vbo, 0);
-	vao.LinkVBO(&vbocol, 1);
+	EBO ebo(indices, NUM_IND);
+
+	VertexBufferLayout layout;
+
+	layout.Push<GLfloat>(3);
+
+	layout.Push<GLfloat>(3);
+
+	vao.LinkVBO(vbo, layout);
+
+	/*
+	vao.LinkVBO(&vbo, 0, sizeof(Pos) / sizeof(GLfloat), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, position));
+	vao.LinkVBO(&vbo, 1, sizeof(Color) / sizeof(GLfloat), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, color));
+	*/
 
 	vbo.Unbind();
 	vao.Unbind();
 	ebo.Unbind();
 
+	// Gets ID of uniform called "u_Opac"
+	GLuint uniID = glGetUniformLocation(shader.GetId(), "u_Red");
+
+
 	// Main while loop
+	float r = 0.0f;
+	float dr = 0.01f;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Specify the color of the background
@@ -100,15 +144,23 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Tell OpenGL which Shader Program we want to use
 		shader.Activate();
+		glUniform1f(uniID, r);
 		// Bind the VAO so OpenGL knows to use it
 		vao.Bind();
 		// Draw the triangle using the GL_TRIANGLES primitive
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, ebo.GetCount(), GL_UNSIGNED_INT, nullptr);
 		vao.Unbind();
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
 		glfwPollEvents();
+		/*
+		if (r > 1.0f)
+			dr *= -1;
+		if (r < 0.0f)
+			dr *= -1;
+		r += dr;
+		*/
 	}
 
 	// Delete window before ending the program

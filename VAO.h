@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include "VBO.h"
+#include "VertexBufferLayout.h"
 
 class VAO
 {
@@ -14,7 +15,9 @@ public:
 	VAO();
 	~VAO();
 
-	void LinkVBO(VBO* VBO, GLuint layout);
+	void LinkVBO(const VBO& vbo, const VertexBufferLayout& layout);
+	
+	void LinkVBO(VBO* vbo, GLuint layout, GLint numComponents, GLenum type, GLsizeiptr stride, size_t offset);
 
 	void Bind();
 

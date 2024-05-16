@@ -13,21 +13,21 @@ class VBO
 {
 
 private:
-	GLuint _id;
+	GLuint m_id;
 
 public:
-	VBO(GLfloat* vertices, GLsizeiptr size);
+	VBO(const GLvoid *vertices, GLsizeiptr size);
 	~VBO();
 
 	// This tells OpenGL that subsequent vertex data operations should be applied to this buffer object.
 	// Bind the VBO specifying it's a GL_ARRAY_BUFFER
-	void Bind();
+	void Bind() const;
 
-	void Unbind();
+	void Unbind() const;
 
 	void Delete();
 
-	void Update(GLsizeiptr size, GLfloat* vertices);
+	void Update(GLsizeiptr size, const GLvoid *vertices);
 
 };
 

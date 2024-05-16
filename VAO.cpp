@@ -10,12 +10,30 @@ VAO::~VAO()
 	Delete();
 }
 
-void VAO::LinkVBO(VBO* vbo, GLuint layout)
+void VAO::LinkVBO(const VBO& vbo, const VertexBufferLayout& layout)
 {
-	(*vbo).Bind();
-	glVertexAttribPointer(layout, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	vbo.Bind();
+	const auto& elements = layout.GetElememts();
+	size_t offset = 0;
+	for (GLuint i = 0; i < elements.size(); i++)
+	{
+		const auto& element = elements[i];
+		glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride()
+			,(const void *) offset);
+		glEnableVertexAttribArray(i);
+
+		// TODO: Handle other types
+		offset += element.count * sizeof(GL_FLOAT);
+	}
+	vbo.Unbind();
+}
+
+void VAO::LinkVBO(VBO* vbo, GLuint layout, GLint numComponents, GLenum type, GLsizeiptr stride, size_t offset)
+{
+	(* vbo).Bind();
+	glVertexAttribPointer(layout, numComponents, type, GL_FALSE, stride, (void *) offset);
 	glEnableVertexAttribArray(layout);
-	(*vbo).Unbind();
+	(* vbo).Unbind();
 }
 
 void VAO::Bind()
