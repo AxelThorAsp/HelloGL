@@ -37,7 +37,7 @@ public:
 		m_Stride += (sizeof(GLuint) * count);
 	}
 
-	inline const std::vector<VertexBufferElement> GetElememts() const& { return m_Elements; }
+	inline const std::vector<VertexBufferElement>& GetElememts() const { return m_Elements; }
 
 	inline GLuint GetStride() const { return m_Stride; }
 };

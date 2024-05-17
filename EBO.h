@@ -17,7 +17,7 @@ private:
 	GLuint m_Count;
 
 public:
-	EBO(GLuint* indices, GLuint count);
+	EBO(const GLuint* indices, GLuint count);
 	~EBO();
 
 	// This tells OpenGL that subsequent vertex data operations should be applied to this buffer object.
@@ -27,6 +27,8 @@ public:
 	void Unbind();
 
 	void Delete();
+
+	void Swap(const void* data);
 
 	inline GLuint GetCount() const
 	{

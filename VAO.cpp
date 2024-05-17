@@ -18,8 +18,7 @@ void VAO::LinkVBO(const VBO& vbo, const VertexBufferLayout& layout)
 	for (GLuint i = 0; i < elements.size(); i++)
 	{
 		const auto& element = elements[i];
-		glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride()
-			,(const void *) offset);
+		glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride(), (const void *) offset);
 		glEnableVertexAttribArray(i);
 
 		// TODO: Handle other types

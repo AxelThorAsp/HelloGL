@@ -9,6 +9,7 @@
 #include "EBO.h"
 #include "Util.h"
 #include "VertexBufferLayout.h"
+#include "Rectangle.h"
 
 
 #define WIN_H 600
@@ -17,47 +18,27 @@
 const char *fragFilePath = "default.frag";
 const char *vertFilePath = "default.vert";
 
-struct Pos
-{
-	GLfloat x, y, z;
-};
-
-struct Color
-{
-	GLfloat r, g, b;
-};
-
-struct Vertex
-{
-	Pos position;
-	Color color;
-};
-
-
 int main(void)
 {
 	// Initialize GLFW
 	glfwInit();
 
 	// Tell GLFW what version of OpenGL we are using 
-	// In this case we are using OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Tell GLFW we are using the CORE profile
-	// So that means we only have the modern functions
+	// use CORE profile
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Create a GLFWwindow object of 800 by 800 pixels
 	GLFWwindow* window = glfwCreateWindow(WIN_W, WIN_H, "HelloOpenGL", NULL, NULL);
-	// Error check if the window fails to create
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
-	// Introduce the window into the current context
 	glfwMakeContextCurrent(window);
+
+	// v-sync
 	glfwSwapInterval(1);
 
 	//Load GLAD so it configures OpenGL
@@ -73,45 +54,14 @@ int main(void)
 
 	Shader shader = Shader(vertFilePath, fragFilePath);
 
-	const int NUM_VERT = 4;
-	// Vertices coordinates
-	Vertex vertices[] =
-	{
-		{
-			{-0.5f, 0.0f, 0.0f},
-			{0.4f, 0.3f, 0.52f}
-		},
-		{
-			{ 0.5f, 0.0f, 0.0f},
-			{0.3f, 0.3f, 0.42f}
-		},
-		{
-			{ 0.5f, 1.0f, 0.0f},
-			{0.2f, 0.2f, 0.8f}
-		},
-		{
-			{-0.5f, 1.0f, 0.0f},
-			{0.2f, 0.2f, 0.8f}
-		},
-	};
-
-
-	const unsigned int NUM_IND = 6;
-	// Indices for vertices order
-	GLuint indices[NUM_IND] =
-	{
-		0, 1, 2,
-		0, 3, 2
-	};
+	Rectangle rect(1.0f, 1.0f, 0, 0);
+	Rectangle rect1(0.5f, 0.5f, -0.5, -0.5);
 
 	VAO vao;
 	vao.Bind();
 
-	VBO vbo(vertices, sizeof(Vertex) * NUM_VERT);
-
-
-	EBO ebo(indices, NUM_IND);
-
+	VBO vbo(rect.GetVertices().data(), rect.GetVertices().size() * sizeof(GLfloat));
+	EBO ebo(rect.GetIndices().data(), rect.GetIndices().size());
 	VertexBufferLayout layout;
 
 	layout.Push<GLfloat>(3);
@@ -120,16 +70,17 @@ int main(void)
 
 	vao.LinkVBO(vbo, layout);
 
+	VAO vao1;
+	vao1.Bind();
+	VBO vbo1(rect1.GetVertices().data(), rect1.GetVertices().size() * sizeof(GLfloat));
+	ebo.Bind();
+	vao1.LinkVBO(vbo1, layout);
+
 	/*
 	vao.LinkVBO(&vbo, 0, sizeof(Pos) / sizeof(GLfloat), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, position));
 	vao.LinkVBO(&vbo, 1, sizeof(Color) / sizeof(GLfloat), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, color));
 	*/
 
-	vbo.Unbind();
-	vao.Unbind();
-	ebo.Unbind();
-
-	// Gets ID of uniform called "u_Opac"
 	GLuint uniID = glGetUniformLocation(shader.GetId(), "u_Red");
 
 
@@ -145,6 +96,10 @@ int main(void)
 		// Tell OpenGL which Shader Program we want to use
 		shader.Activate();
 		glUniform1f(uniID, r);
+		vao1.Bind();
+		// Draw the triangle using the GL_TRIANGLES primitive
+		glDrawElements(GL_TRIANGLES, ebo.GetCount(), GL_UNSIGNED_INT, nullptr);
+		vao1.Unbind();
 		// Bind the VAO so OpenGL knows to use it
 		vao.Bind();
 		// Draw the triangle using the GL_TRIANGLES primitive
@@ -154,13 +109,6 @@ int main(void)
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
 		glfwPollEvents();
-		/*
-		if (r > 1.0f)
-			dr *= -1;
-		if (r < 0.0f)
-			dr *= -1;
-		r += dr;
-		*/
 	}
 
 	// Delete window before ending the program
