@@ -13,7 +13,7 @@ Rectangle::Rectangle(GLfloat width, GLfloat height, GLfloat x, GLfloat y)
 	// col
 	m_Vertices.push_back(0);
 	m_Vertices.push_back(0);
-	m_Vertices.push_back(1);
+	m_Vertices.push_back(0.5f);
 
 	// 2
 	m_Vertices.push_back(x + width);
@@ -21,9 +21,9 @@ Rectangle::Rectangle(GLfloat width, GLfloat height, GLfloat x, GLfloat y)
 	m_Vertices.push_back(0);
 
 	// col
+	m_Vertices.push_back(0.5f);
 	m_Vertices.push_back(0);
 	m_Vertices.push_back(0);
-	m_Vertices.push_back(1);
 
 	// 3
 	m_Vertices.push_back(x + width);
@@ -32,8 +32,8 @@ Rectangle::Rectangle(GLfloat width, GLfloat height, GLfloat x, GLfloat y)
 
 	// col
 	m_Vertices.push_back(0);
+	m_Vertices.push_back(0.5f);
 	m_Vertices.push_back(0);
-	m_Vertices.push_back(1);
 
 	// 4
 	m_Vertices.push_back(x);

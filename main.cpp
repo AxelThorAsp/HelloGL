@@ -10,6 +10,7 @@
 #include "Util.h"
 #include "VertexBufferLayout.h"
 #include "Rectangle.h"
+#include "Circle.h"
 
 
 #define WIN_H 600
@@ -54,27 +55,29 @@ int main(void)
 
 	Shader shader = Shader(vertFilePath, fragFilePath);
 
-	Rectangle rect(1.0f, 1.0f, 0, 0);
-	Rectangle rect1(0.5f, 0.5f, -0.5, -0.5);
+	//Rectangle rect(1.0f, 1.0f, 0, 0);
+	//Rectangle rect1(0.5f, 0.5f, -0.5, -0.5);
+	Circle circle(0.5f, 0, 0);
 
 	VAO vao;
 	vao.Bind();
 
-	VBO vbo(rect.GetVertices().data(), rect.GetVertices().size() * sizeof(GLfloat));
-	EBO ebo(rect.GetIndices().data(), rect.GetIndices().size());
+
+	VBO vbo(circle.GetVertices().data(), circle.GetVertices().size() * sizeof(GLfloat));
+	EBO ebo(circle.GetIndices().data(), circle.GetIndices().size());
 	VertexBufferLayout layout;
 
 	layout.Push<GLfloat>(3);
-
 	layout.Push<GLfloat>(3);
-
 	vao.LinkVBO(vbo, layout);
 
-	VAO vao1;
-	vao1.Bind();
-	VBO vbo1(rect1.GetVertices().data(), rect1.GetVertices().size() * sizeof(GLfloat));
-	ebo.Bind();
-	vao1.LinkVBO(vbo1, layout);
+	//VAO vao1;
+	//vao1.Bind();
+	// bind to the current VAO
+	//ebo.Bind();
+	//VBO vbo1(rect1.GetVertices().data(), rect1.GetVertices().size() * sizeof(GLfloat));
+
+	//vao1.LinkVBO(vbo1, layout);
 
 	/*
 	vao.LinkVBO(&vbo, 0, sizeof(Pos) / sizeof(GLfloat), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, position));
@@ -96,11 +99,17 @@ int main(void)
 		// Tell OpenGL which Shader Program we want to use
 		shader.Activate();
 		glUniform1f(uniID, r);
+		/*
 		vao1.Bind();
 		// Draw the triangle using the GL_TRIANGLES primitive
 		glDrawElements(GL_TRIANGLES, ebo.GetCount(), GL_UNSIGNED_INT, nullptr);
 		vao1.Unbind();
 		// Bind the VAO so OpenGL knows to use it
+		vao.Bind();
+		// Draw the triangle using the GL_TRIANGLES primitive
+		glDrawElements(GL_TRIANGLES, ebo.GetCount(), GL_UNSIGNED_INT, nullptr);
+		vao.Unbind();
+		*/
 		vao.Bind();
 		// Draw the triangle using the GL_TRIANGLES primitive
 		glDrawElements(GL_TRIANGLES, ebo.GetCount(), GL_UNSIGNED_INT, nullptr);
